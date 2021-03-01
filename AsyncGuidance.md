@@ -41,7 +41,7 @@ public int DoSomethingAsync()
 }
 ```
 
-:white_check_mark: **GOOD** This example uses the await keyword to get the result from `CallDependencyAsync`.
+:heavy_check_mark: **GOOD** This example uses the await keyword to get the result from `CallDependencyAsync`.
 
 ```C#
 public async Task<int> DoSomethingAsync()
@@ -111,7 +111,7 @@ public class MyLibrary
 }
 ```
 
-:white_check_mark: **GOOD** This example uses `Task.FromResult` to return the trivially computed value. It does not use any extra threads as a result.
+:heavy_check_mark: **GOOD** This example uses `Task.FromResult` to return the trivially computed value. It does not use any extra threads as a result.
 
 ```C#
 public class MyLibrary
@@ -125,7 +125,7 @@ public class MyLibrary
 
 :bulb:**NOTE: Using `Task.FromResult` will result in a `Task` allocation. Using `ValueTask<T>` can completely remove that allocation.**
 
-:white_check_mark: **GOOD** This example uses a `ValueTask<int>` to return the trivially computed value. It does not use any extra threads as a result. It also does not allocate an object on the managed heap.
+:heavy_check_mark: **GOOD** This example uses a `ValueTask<int>` to return the trivially computed value. It does not use any extra threads as a result. It also does not allocate an object on the managed heap.
 
 ```C#
 public class MyLibrary
@@ -177,7 +177,9 @@ public class QueueProcessor
 }
 ```
 
-:white_check_mark: **GOOD** This example uses a dedicated thread to process the message queue instead of a thread-pool thread.
+:heavy_check_mark: **GOOD** This example uses a dedicated thread to process the message queue instead of a thread-pool thread.
+
+TODO replace with asnyc version
 
 ```C#
 public class QueueProcessor
@@ -303,7 +305,7 @@ public Task<int> DoSomethingAsync()
 }
 ```
 
-:white_check_mark: **GOOD** This example uses the `await` keyword to get the result from `CallDependencyAsync`.
+:heavy_check_mark: **GOOD** This example uses the `await` keyword to get the result from `CallDependencyAsync`.
 
 ```C#
 public async Task<int> DoSomethingAsync()
@@ -337,7 +339,7 @@ public Task<int> DoSomethingAsync()
 }
 ```
 
-:white_check_mark: **GOOD** This example uses `TaskCreationOptions.RunContinuationsAsynchronously` when creating the `TaskCompletionSource<T>`.
+:heavy_check_mark: **GOOD** This example uses `TaskCreationOptions.RunContinuationsAsynchronously` when creating the `TaskCompletionSource<T>`.
 
 ```C#
 public Task<int> DoSomethingAsync()
@@ -376,7 +378,7 @@ public async Task<Stream> HttpClientAsyncWithCancellationBad()
 }
 ```
 
-:white_check_mark: **GOOD** This example disposes the `CancellationTokenSource` and properly removes the timer from the queue.
+:heavy_check_mark: **GOOD** This example disposes the `CancellationTokenSource` and properly removes the timer from the queue.
 
 ```C#
 public async Task<Stream> HttpClientAsyncWithCancellationGood()
@@ -408,7 +410,7 @@ public async Task<string> DoAsyncThing(CancellationToken cancellationToken = def
 }
 ```
 
-:white_check_mark: **GOOD** This example passes the `CancellationToken` into `Stream.ReadAsync`.
+:heavy_check_mark: **GOOD** This example passes the `CancellationToken` into `Stream.ReadAsync`.
 
 ```C#
 public async Task<string> DoAsyncThing(CancellationToken cancellationToken = default)
@@ -445,7 +447,7 @@ public static async Task<T> WithCancellation<T>(this Task<T> task, CancellationT
 }
 ```
 
-:white_check_mark: **GOOD** This example disposes the `CancellationTokenRegistration` when one of the `Task(s)` complete.
+:heavy_check_mark: **GOOD** This example disposes the `CancellationTokenRegistration` when one of the `Task(s)` complete.
 
 ```C#
 public static async Task<T> WithCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
@@ -491,7 +493,7 @@ public static async Task<T> TimeoutAfter<T>(this Task<T> task, TimeSpan timeout)
 }
 ```
 
-:white_check_mark: **GOOD** This example cancels the timer if the operation succesfully completes.
+:heavy_check_mark: **GOOD** This example cancels the timer if the operation succesfully completes.
 
 ```C#
 public static async Task<T> TimeoutAfter<T>(this Task<T> task, TimeSpan timeout)
@@ -536,7 +538,7 @@ app.Run(async context =>
 });
 ```
 
-:white_check_mark: **GOOD** This example asynchronously flushes any buffered data while disposing the `StreamWriter`.
+:heavy_check_mark: **GOOD** This example asynchronously flushes any buffered data while disposing the `StreamWriter`.
 
 ```C#
 app.Run(async context =>
@@ -549,7 +551,7 @@ app.Run(async context =>
 });
 ```
 
-:white_check_mark: **GOOD** This example asynchronously flushes any buffered data before disposing the `StreamWriter`.
+:heavy_check_mark: **GOOD** This example asynchronously flushes any buffered data before disposing the `StreamWriter`.
 
 ```C#
 app.Run(async context =>
@@ -588,7 +590,7 @@ private async Task AddStuff(int i) {
 }
 ```
 
-:white_check_mark: **GOOD** This examples uses an immutable list with optimistic concurrency.
+:heavy_check_mark: **GOOD** This examples uses an immutable list with optimistic concurrency.
 
 ```C#
 ImmutableList iList = new ImmutableList();
@@ -601,7 +603,7 @@ private bool AddStuff(int i)
 
 :bulb: **NOTE: This method is suitable for a low concurrent update count**
 
-:white_check_mark: **CONSIDER** using collection types that inherently offer concurrency benefits, such as ConcurrentBag or ImmutableDictionary. Lists don't due to their single in-order insertion point.
+:heavy_plus_sign: **CONSIDER** using collection types that inherently offer concurrency benefits, such as ConcurrentBag or ImmutableDictionary. Lists don't due to their single in-order insertion point.
 
 :bulb: Also see [ConcurrentDictionary.GetOrAdd](#concurrentdictionarygetoradd)
 
@@ -686,7 +688,7 @@ public class Pinger
 }
 ```
 
-:white_check_mark: **GOOD** This example uses an `async Task`-based method and discards the `Task` in the `Timer` callback. If this method fails, it will not crash the process. Instead, it will fire the [`TaskScheduler.UnobservedTaskException`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=netframework-4.7.2) event.
+:heavy_check_mark: **GOOD** This example uses an `async Task`-based method and discards the `Task` in the `Timer` callback. If this method fails, it will not crash the process. Instead, it will fire the [`TaskScheduler.UnobservedTaskException`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=netframework-4.7.2) event.
 
 ```C#
 public class Pinger
@@ -752,7 +754,7 @@ public class Program
 }
 ```
 
-:white_check_mark: **GOOD** This BackgroundQueue implementation offers both sync and `async` callback overloads.
+:heavy_check_mark: **GOOD** This BackgroundQueue implementation offers both sync and `async` callback overloads.
 
 ```C#
 public class BackgroundQueue
@@ -814,7 +816,7 @@ public class PersonController : Controller
 }
 ```
 
-:white_check_mark: **GOOD** This implementation fixes the multiple-executing callback issue by using the `async` lazy pattern.
+:heavy_check_mark: **GOOD** This implementation fixes the multiple-executing callback issue by using the `async` lazy pattern.
 
 ```C#
 public class PersonController : Controller
@@ -878,7 +880,7 @@ public class Service : IService
 }
 ```
 
-:white_check_mark: **GOOD** This implementation uses a static factory pattern in order to allow asynchronous construction:
+:heavy_check_mark: **GOOD** This implementation uses a static factory pattern in order to allow asynchronous construction:
 
 ```C#
 public class Service : IService
@@ -928,7 +930,7 @@ public IEnumerable<Product> GetDataImpersonatedAsync(SafeAccessTokenHandle safeA
 }
 ```
 
-:white_check_mark: **GOOD** This example awaits the result of `RunImpersonated` (the delegate is `Func<Task<IEnumerable<Product>>>` in this case).
+:heavy_check_mark: **GOOD** This example awaits the result of `RunImpersonated` (the delegate is `Func<Task<IEnumerable<Product>>>` in this case).
 
 ```C#
 public async Task<IEnumerable<Product>> GetDataImpersonatedAsync(SafeAccessTokenHandle safeAccessTokenHandle)
