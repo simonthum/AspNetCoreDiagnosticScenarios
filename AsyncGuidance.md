@@ -521,6 +521,15 @@ public static async Task<T> TimeoutAfter<T>(this Task<T> task, TimeSpan timeout)
 }
 ```
 
+## Avoid the use of Task.Delay outside of clear-cut timing scenarios
+
+It can be tempting to use Task.Delay to replace proper synchronization or task management. Delays may be used to cover up all sorts of problems
+ranging from improper synchronization, badly designed concurrency domains or event loops, to missed awaits from void returning methods.
+
+:x: **AVOID** using Task.Delay to ~~cover up~~ handle non-timing issues. It will put you an a thin fragile path between hard-to-grasp performance problems and outright failure.
+
+TODO example
+
 ## Always call `FlushAsync` on `StreamWriter`(s) or `Stream`(s) before calling `Dispose`
 
 When writing to a `Stream` or `StreamWriter`, even if the asynchronous overloads are used for writing, the underlying data might be buffered. When data is buffered, disposing the `Stream` or `StreamWriter` via the `Dispose` method will synchronously write/flush, which results in blocking the thread and could lead to thread-pool starvation. Either use the asynchronous `DisposeAsync` method (for example via `await using`) or call `FlushAsync` before calling `Dispose`.
