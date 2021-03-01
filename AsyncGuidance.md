@@ -11,6 +11,7 @@
    - [Always flow CancellationToken(s) to APIs that take a CancellationToken](#always-flow-cancellationtokens-to-apis-that-take-a-cancellationtoken)
    - [Cancelling uncancellable operations](#cancelling-uncancellable-operations)
    - [Always call FlushAsync on StreamWriter(s) or Stream(s) before calling Dispose](#always-call-flushasync-on-streamwriters-or-streams-before-calling-dispose)
+   - [Prefer concurrent or immutable collections](#prefer-concurrent-or-immutable-collections-over-unsafe-standard-collections-with-async-protection-asynclock-types-or-semaphoreslim)
    - [Prefer async/await over directly returning Task](#prefer-asyncawait-over-directly-returning-task)
    - [ConfigureAwait](#configureawait)
  - [Scenarios](#scenarios)
@@ -566,9 +567,9 @@ app.Run(async context =>
 ## Prefer concurrent or immutable collections over unsafe standard collections with `async` protection (`AsyncLock` types or `SemaphoreSlim`)
 
 There are only few situations in which an async protection to standard collections is advantageous. The concurrency limit imposed
-by such techniques can quickly escalate under load, and async efficiency will just cover it for longer.
+by such techniques can quickly escalate under load, and async efficiency will just cover it for "longer-than-threads".
 
-❌ **BAD** This example uses a SemaphoreSlim to protect access to a standard `List<T>`. It will almost alyways be less efficient than concurrent or immutable counterparts. Also, it is too easy to miss protection, especially when using LINQ to enumerate `iList`.
+❌ **BAD** This example uses a SemaphoreSlim to protect access to a standard `List<T>`. It will almost always become less efficient than concurrent or immutable counterparts. Also, it is too easy to miss protection, especially when using LINQ on the list without ToList().
 
 ```C#
 SemaphoreSlim collectionAsyncLock = new SemaphoreSlim(1, 1);
@@ -587,7 +588,7 @@ private async Task AddStuff(int i) {
 }
 ```
 
-:white_check_mark: **GOOD** This examples uses an immutable list with optimistic concurrency, as there is no point in going async on solely in-memory collections most of the time.
+:white_check_mark: **GOOD** This examples uses an immutable list with optimistic concurrency.
 
 ```C#
 ImmutableList iList = new ImmutableList();
