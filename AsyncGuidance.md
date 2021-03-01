@@ -563,6 +563,21 @@ app.Run(async context =>
 });
 ```
 
+## Prefer concurrent or immutable collections over unsafe standard collections with `async` protection (`AsyncLock` types or `SemaphoreSlim`)
+
+There are only few situations in which an async protection to standard collections is advantageous. The concurrency limit imposed
+by such techniques can quickly become a probelm under load, and async efficiency will just cover it for longer.
+
+❌ **BAD** This example uses a SemapohoreSlim to protect access to a standard `List`.
+
+```C#
+public Task<int> DoSomethingAsync()
+{
+    return CallDependencyAsync();
+}
+```
+
+
 ## Prefer `async`/`await` over directly returning `Task`
 
 There are benefits to using the `async`/`await` keyword instead of directly returning the `Task`:
@@ -589,7 +604,7 @@ public async Task<int> DoSomethingAsync()
 }
 ```
 
-:bulb:**NOTE: There are performance considerations when using an async state machine over directly returning the `Task`. It's always faster to directly return the `Task` since it does less work but you end up changing the behavior and potentially losing some of the benefits of the async state machine.**
+:bulb:**NOTE: There are performance considerations when using an async state machine over directly returning the `Task`. It's always faster to directly return the `Task` since it does less work, but you end up changing the behavior and potentially losing some of the benefits of the async state machine.**
 
 ## ConfigureAwait
 
