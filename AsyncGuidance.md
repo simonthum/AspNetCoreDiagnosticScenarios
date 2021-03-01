@@ -566,16 +566,43 @@ app.Run(async context =>
 ## Prefer concurrent or immutable collections over unsafe standard collections with `async` protection (`AsyncLock` types or `SemaphoreSlim`)
 
 There are only few situations in which an async protection to standard collections is advantageous. The concurrency limit imposed
-by such techniques can quickly become a probelm under load, and async efficiency will just cover it for longer.
+by such techniques can quickly escalate under load, and async efficiency will just cover it for longer.
 
-❌ **BAD** This example uses a SemapohoreSlim to protect access to a standard `List`.
+❌ **BAD** This example uses a SemaphoreSlim to protect access to a standard `List<T>`. It will almost alyways be less efficient than concurrent or immutable counterparts. Also, it is too easy to miss protection, especially when using LINQ to enumerate `iList`.
 
 ```C#
-public Task<int> DoSomethingAsync()
-{
-    return CallDependencyAsync();
+SemaphoreSlim collectionAsyncLock = new SemaphoreSlim(1, 1);
+List<int> iList = new List<int>();
+
+private async Task AddStuff(int i) {
+    await collectionAsyncLock.WaitAsync();
+    try
+    {
+        iList.Add(i);
+    }
+    finally
+    {
+        collectionAsyncLock.Release();
+    }
 }
 ```
+
+:white_check_mark: **GOOD** This examples uses an immutable list with optimistic concurrency, as there is no point in going async on solely in-memory collections most of the time.
+
+```C#
+ImmutableList iList = new ImmutableList();
+
+private bool AddStuff(int i)
+{
+    return ImmutableInterlocked.Update(ref iList, list => list.Add(i));
+}
+```
+
+:bulb: **NOTE: This method is suitable for a low concurrent update count**
+
+:white_check_mark: **CONSIDER** using collection types that inherently offer concurrency benefits, such as ConcurrentBag or ImmutableDictionary. Lists don't due to their single in-order insertion point.
+
+:bulb: Also see [ConcurrentDictionary.GetOrAdd](#concurrentdictionarygetoradd)
 
 
 ## Prefer `async`/`await` over directly returning `Task`
@@ -684,6 +711,14 @@ public class Pinger
     }
 }
 ```
+
+:bulb:**NOTE: Timers do not have a notion of completeness or cancellation of the process they trigger, so it is often better to use Task.Delay, a background queue or debouncing.
+
+## Offloading work items to a different concurrency domain (background queue, debouncer)
+
+TODO Coop semaphore, (bounded) Channel
+
+
 
 ## Implicit `async void` delegates
 
