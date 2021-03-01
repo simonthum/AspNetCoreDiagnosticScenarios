@@ -10,6 +10,7 @@
    - [Always dispose CancellationTokenSource(s) used for timeouts](#always-dispose-cancellationtokensources-used-for-timeouts)
    - [Always flow CancellationToken(s) to APIs that take a CancellationToken](#always-flow-cancellationtokens-to-apis-that-take-a-cancellationtoken)
    - [Cancelling uncancellable operations](#cancelling-uncancellable-operations)
+   - [Avoid Task.Delay outside of timing scenarios](#avoid-the-use-of-taskdelay-outside-of-clear-cut-timing-scenarios)
    - [Always call FlushAsync on StreamWriter(s) or Stream(s) before calling Dispose](#always-call-flushasync-on-streamwriters-or-streams-before-calling-dispose)
    - [Prefer concurrent or immutable collections](#prefer-concurrent-or-immutable-collections-over-unsafe-standard-collections-with-async-protection-asynclock-types-or-semaphoreslim)
    - [Prefer async/await over directly returning Task](#prefer-asyncawait-over-directly-returning-task)
