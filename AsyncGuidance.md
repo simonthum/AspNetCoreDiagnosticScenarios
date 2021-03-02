@@ -180,9 +180,57 @@ public class QueueProcessor
 }
 ```
 
-:heavy_check_mark: **GOOD** This example uses a dedicated thread to process the message queue instead of a thread-pool thread.
+:heavy_check_mark: **GOOD** This example uses a semaphore to avoid blocking and processes the queue in an async loop.
 
-TODO replace with asnyc version
+:bulb: Unlike explicitly threaded variants, the async loop below is easy to run in the same concurrency domain as other code.
+
+:heavy_plus_sign: This is a simplified version of the code found under https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services. Also be sure to check out `System.Threading.Channels`.
+
+```C#
+public class TaskQueue
+{
+    private ConcurrentQueue<Func<CancellationToken, Task>> _workItems = 
+        new ConcurrentQueue<Func<CancellationToken, Task>>();
+    private SemaphoreSlim _signal = new SemaphoreSlim(0);
+
+    public void QueueWorkItem(
+        Func<CancellationToken, Task> workItem)
+    {
+        if (workItem == null)
+        {
+            throw new ArgumentNullException(nameof(workItem));
+        }
+
+        _workItems.Enqueue(workItem);
+        _signal.Release();
+    }
+
+    private async Task<Func<CancellationToken, Task>> DequeueAsync(
+        CancellationToken cancellationToken)
+    {
+        await _signal.WaitAsync(cancellationToken);
+        _workItems.TryDequeue(out var workItem);
+
+        return workItem;
+    }
+    
+    public async Task RunAsync(
+        CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var workItem = await DequeueAsync(cancellationToken);
+                await workItem(cancellationToken);
+            }
+            catch (TaskCanceledException) { }
+        }
+    }
+}
+```
+
+:heavy_check_mark: **GOOD** This example uses a dedicated thread to process the message queue instead of a thread-pool thread.
 
 ```C#
 public class QueueProcessor
@@ -215,6 +263,7 @@ public class QueueProcessor
     private void ProcessItem(Message message) { }
 }
 ```
+
 
 ## Avoid using `Task.Result` and `Task.Wait`
 
